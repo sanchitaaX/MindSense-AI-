@@ -5,7 +5,7 @@ import { HeroPage } from "./pages/HeroPage";
 import { AuthPage } from "./pages/AuthPage";
 import { ChatPage } from "./pages/ChatPage";
 import { DashboardPage } from "./pages/DashboardPage";
-import { PricingPage } from "./pages/PricingPage";
+import { ReduceStressPage } from "./pages/ReduceStressPage";
 import { GlassFilter } from "./components/ui/liquid-glass";
 
 function AppRoutes() {
@@ -20,7 +20,7 @@ function AppRoutes() {
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/reduce-stress" element={<ReduceStressPage />} />
         </Routes>
       </AnimatePresence>
     </>

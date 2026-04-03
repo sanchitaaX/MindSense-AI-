@@ -119,6 +119,8 @@ export const DashboardPage: React.FC = () => {
     const [vouchers, setVouchers] = useState<Voucher[]>([]);
     const [currentScore, setCurrentScore] = useState(0);
     const [loadingData, setLoadingData] = useState(false);
+    const [insightReport, setInsightReport] = useState<string | null>(null);
+    const [loadingInsight, setLoadingInsight] = useState(false);
 
     useEffect(() => {
         if (!auth) {
@@ -166,6 +168,26 @@ export const DashboardPage: React.FC = () => {
             } else {
                 setScoreHistory([]);
                 setCurrentScore(0); // Brand new user
+            }
+
+            // Generate weekly insight on Monday (or today for demo)
+            // Using true for demo purposes, or `new Date().getDay() === 5` (Friday, today)
+            const d = new Date();
+            if ((d.getDay() === 1 || d.getDay() === 5) && historyData.length > 0) {
+                setLoadingInsight(true);
+                try {
+                    const res = await fetch("http://localhost:8000/api/weekly-insight", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ history: historyData })
+                    });
+                    const data = await res.json();
+                    if (data.report) setInsightReport(data.report);
+                } catch (e) {
+                    console.error("Failed to fetch weekly insight", e);
+                } finally {
+                    setLoadingInsight(false);
+                }
             }
 
             // Fetch vouchers
@@ -241,6 +263,37 @@ export const DashboardPage: React.FC = () => {
                     </div>
                 ) : (
                     <>
+                        {/* Weekly Insight Report */}
+                        {!isLocked && (insightReport || loadingInsight) && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                style={{
+                                    background: "rgba(255,255,255,0.75)",
+                                    backdropFilter: "blur(20px)",
+                                    borderRadius: 24,
+                                    border: "2px solid rgba(233,30,140,0.3)",
+                                    padding: "32px",
+                                    marginBottom: 28,
+                                    boxShadow: "0 12px 40px rgba(233,30,140,0.1)",
+                                }}
+                            >
+                                <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
+                                    <Sparkles size={24} color="#e91e8c" />
+                                    Weekly Insight Report
+                                </h2>
+                                {loadingInsight ? (
+                                    <div style={{ display: "flex", gap: 10, alignItems: "center", color: "#64748b" }}>
+                                        <Loader /> <span>Synthesizing your journey...</span>
+                                    </div>
+                                ) : (
+                                    <p style={{ fontSize: 16, lineHeight: 1.6, color: "var(--text-primary)", fontWeight: 500 }}>
+                                        {insightReport}
+                                    </p>
+                                )}
+                            </motion.div>
+                        )}
+
                         {/* Score Card */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -452,12 +505,12 @@ export const DashboardPage: React.FC = () => {
                             Start Session
                         </button>
                     </Link>
-                    <Link to="/pricing" style={{ textDecoration: "none", flex: 1 }}>
+                    <Link to="/reduce-stress" style={{ textDecoration: "none", flex: 1 }}>
                         <button
                             className="neo-btn neo-btn-secondary"
                             style={{ width: "100%", padding: "16px 0", fontSize: 16 }}
                         >
-                            Upgrade Plan
+                            Reduce Stress
                         </button>
                     </Link>
                 </div>

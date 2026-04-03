@@ -11,3 +11,8 @@ numpy
 python-multipart
 groq
 python-dotenv
+openai-whisper
+TTS
+torchaudio
+pydub
+soundfile

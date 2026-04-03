@@ -25,7 +25,7 @@ export const Navbar: React.FC = () => {
         { to: "/", label: "Home" },
         { to: "/chat", label: "Chat" },
         { to: "/dashboard", label: "Dashboard" },
-        { to: "/pricing", label: "Pricing" },
+        { to: "/reduce-stress", label: "Coping Tools" },
     ];
 
     const isHero = location.pathname === "/";

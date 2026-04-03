@@ -11,6 +11,8 @@ import { VoucherModal } from "../components/VoucherModal";
 import { CrisisPanel } from "../components/CrisisPanel";
 import { Canvas } from "@react-three/fiber";
 import { FluidScene } from "../components/ui/living-fluid-hero";
+import { VoiceInput } from "../components/ui/VoiceInput";
+import { TherapistCard } from "../components/ui/therapist-card";
 import Loader from "../components/ui/loader-15";
 
 export const ChatPage: React.FC = () => {
@@ -253,10 +255,96 @@ export const ChatPage: React.FC = () => {
                             </motion.div>
                         )}
                     </AnimatePresence>
+
+                    {/* Therapist Recommendations — shown when risk > 80 */}
+                    {riskScore.score > 80 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20, scale: 0.97 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            transition={{ delay: 0.3, type: "spring", damping: 22 }}
+                            style={{
+                                alignSelf: "flex-start",
+                                width: "100%",
+                                marginTop: 12,
+                                position: "relative",
+                                zIndex: 10,
+                            }}
+                        >
+                            <div style={{
+                                background: "linear-gradient(135deg, rgba(255,255,255,0.92), rgba(250,245,255,0.95))",
+                                backdropFilter: "blur(20px)",
+                                borderRadius: 24,
+                                border: "1.5px solid rgba(168,85,247,0.2)",
+                                overflow: "hidden",
+                                boxShadow: "0 12px 40px rgba(168,85,247,0.08), 0 2px 8px rgba(0,0,0,0.04)",
+                            }}>
+                                {/* Header accent */}
+                                <div style={{
+                                    height: 3,
+                                    background: "linear-gradient(90deg, #ef4444, #e91e8c, #a855f7)",
+                                }} />
+
+                                <div style={{ padding: "20px 24px" }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                                        <div style={{
+                                            width: 32, height: 32, borderRadius: 10,
+                                            background: "linear-gradient(135deg, #ef4444, #e91e8c)",
+                                            display: "flex", alignItems: "center", justifyContent: "center",
+                                            boxShadow: "0 4px 12px rgba(239,68,68,0.25)",
+                                            fontSize: 14,
+                                        }}>
+                                            💙
+                                        </div>
+                                        <div>
+                                            <p style={{ fontWeight: 800, fontSize: 13, color: "#0f172a", letterSpacing: 0.3 }}>
+                                                Professional Support Available
+                                            </p>
+                                            <p style={{ fontSize: 11, color: "#64748b", fontWeight: 500, marginTop: 1 }}>
+                                                Verified therapists ready to help — message via WhatsApp
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: "flex", gap: 14, overflowX: "auto", paddingTop: 14, paddingBottom: 4 }} className="custom-scrollbar">
+                                        <TherapistCard
+                                            name="Dr. Priya Sharma"
+                                            specialization="Anxiety & Trauma Specialist"
+                                            languages={["English", "Hindi", "Marathi"]}
+                                            yearsOfExperience={8}
+                                            rating={4.7}
+                                            reviewCount={124}
+                                            whatsappNumber="+919876543210"
+                                            isVerified={true}
+                                        />
+                                        <TherapistCard
+                                            name="Dr. Arjun Mehta"
+                                            specialization="Depression & CBT Expert"
+                                            languages={["English", "Hindi", "Gujarati"]}
+                                            yearsOfExperience={12}
+                                            rating={4.9}
+                                            reviewCount={237}
+                                            whatsappNumber="+919123456789"
+                                            isVerified={true}
+                                        />
+                                        <TherapistCard
+                                            name="Dr. Sneha Kapoor"
+                                            specialization="Relationship & Family Therapist"
+                                            languages={["English", "Hindi", "Punjabi"]}
+                                            yearsOfExperience={5}
+                                            rating={4.5}
+                                            reviewCount={89}
+                                            whatsappNumber="+918765432109"
+                                            isVerified={false}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
                 </div>
 
                 {/* Input */}
-                <div style={{ padding: "0 32px 32px", position: "relative", zIndex: 10 }}>
+                <div style={{ padding: "0 32px 32px", position: "relative", zIndex: 10, display: "flex", flexDirection: "column", gap: 16 }}>
                     <div style={{ display: "flex", gap: 12, padding: 8, background: "#fff", border: "3px solid #000", borderRadius: 32, boxShadow: "8px 8px 0px #000" }}>
                         <input
                             value={inputVal} onChange={e => setInputVal(e.target.value)}
@@ -268,6 +356,11 @@ export const ChatPage: React.FC = () => {
                             <Send size={20} />
                         </button>
                     </div>
+
+                    <VoiceInput
+                        onMessage={(text) => sendMessage(text, riskScore.score)}
+                        botReply={messages.filter(m => m.role === 'assistant').pop()?.content || null}
+                    />
                 </div>
             </div>
 

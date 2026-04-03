@@ -189,19 +189,78 @@ export function WebcamCapture({
 
             <AnimatePresence>
                 {showConsent && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md">
                         <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            className="bg-white border-4 border-slate-900 shadow-[8px_8px_0px_rgba(0,0,0,1)] rounded-3xl p-8 max-w-sm pointer-events-auto"
+                            initial={{ scale: 0.85, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.85, opacity: 0, y: 20 }}
+                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                            style={{
+                                background: "rgba(255,255,255,0.95)",
+                                backdropFilter: "blur(24px)",
+                                borderRadius: 28,
+                                padding: "36px 32px",
+                                maxWidth: 380,
+                                width: "100%",
+                                border: "1px solid rgba(233,30,140,0.15)",
+                                boxShadow: "0 24px 80px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.5) inset",
+                            }}
                         >
-                            <h3 className="text-2xl font-black mb-4">Waking up the Eye?</h3>
-                            <p className="text-slate-600 mb-6 font-medium">MindSense will use your camera to read micro-expressions. No recording, just numbers. Stop anytime.</p>
-                            <div className="flex gap-4">
-                                <button onClick={() => setShowConsent(false)} className="flex-1 py-3 border-2 border-slate-900 rounded-xl font-black hover:bg-slate-50">SHY</button>
-                                <button onClick={() => { setShowConsent(false); onToggle(true); }} className="flex-1 py-3 bg-pink-500 text-white border-2 border-slate-900 rounded-xl font-black shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] active:translate-y-[0px] transition-all">ENABLE</button>
+                            {/* Icon */}
+                            <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+                                <div style={{
+                                    width: 56, height: 56, borderRadius: 16,
+                                    background: "linear-gradient(135deg, #e91e8c, #a855f7)",
+                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                    boxShadow: "0 8px 24px rgba(233,30,140,0.3)",
+                                }}>
+                                    <Camera className="w-6 h-6 text-white" />
+                                </div>
                             </div>
+
+                            <h3 style={{ fontFamily: "var(--font-display)", fontSize: 22, textAlign: "center", marginBottom: 8, color: "#0f172a" }}>
+                                Enable Face Reading?
+                            </h3>
+                            <p style={{ color: "#64748b", textAlign: "center", fontSize: 13, lineHeight: 1.6, marginBottom: 28, fontWeight: 500 }}>
+                                MindSense will use your camera to detect micro-expressions in real time. <strong style={{ color: "#0f172a" }}>Nothing is ever recorded</strong> — only emotion scores are used.
+                            </p>
+
+                            <div style={{ display: "flex", gap: 12 }}>
+                                <button
+                                    onClick={() => setShowConsent(false)}
+                                    style={{
+                                        flex: 1, padding: "12px 0", borderRadius: 14,
+                                        border: "2px solid #e2e8f0", background: "#fff",
+                                        fontWeight: 700, fontSize: 14, color: "#64748b",
+                                        cursor: "pointer", transition: "all 0.2s",
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.background = "#f8fafc"; e.currentTarget.style.borderColor = "#cbd5e1"; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.borderColor = "#e2e8f0"; }}
+                                >
+                                    Not Now
+                                </button>
+                                <button
+                                    onClick={() => { setShowConsent(false); onToggle(true); }}
+                                    style={{
+                                        flex: 1, padding: "12px 0", borderRadius: 14,
+                                        border: "none",
+                                        background: "linear-gradient(135deg, #e91e8c, #a855f7)",
+                                        fontWeight: 700, fontSize: 14, color: "#fff",
+                                        cursor: "pointer", transition: "all 0.2s",
+                                        boxShadow: "0 4px 16px rgba(233,30,140,0.35)",
+                                        display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(233,30,140,0.4)"; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(233,30,140,0.35)"; }}
+                                >
+                                    <Camera className="w-4 h-4" />
+                                    Enable
+                                </button>
+                            </div>
+
+                            <p style={{ textAlign: "center", fontSize: 10, color: "#94a3b8", marginTop: 16, fontWeight: 500 }}>
+                                🔒 Your privacy is our priority. You can disable this anytime.
+                            </p>
                         </motion.div>
                     </div>
                 )}
