@@ -3,7 +3,7 @@ load_dotenv()
 
 from fastapi import FastAPI  # type: ignore
 from fastapi.middleware.cors import CORSMiddleware  # type: ignore
-from routers import face_analysis, text_analysis, chat, voucher, insights, voice  # type: ignore
+from routers import face_analysis, text_analysis, chat, voucher, insights, voice, emotion_fusion  # type: ignore
 import os
 
 app = FastAPI(title="MindSense AI Backend", version="1.0.0")
@@ -39,6 +39,7 @@ app.include_router(chat.router, prefix="/api")
 app.include_router(voucher.router, prefix="/api")
 app.include_router(insights.router, prefix="/api")
 app.include_router(voice.router, prefix="/api")
+app.include_router(emotion_fusion.router, prefix="/api")
 
 
 @app.get("/health")

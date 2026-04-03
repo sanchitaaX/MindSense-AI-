@@ -7,24 +7,25 @@ from pydantic import BaseModel  # type: ignore
 import base64
 import numpy as np  # type: ignore
 import cv2  # type: ignore
-
 import shutil
 from pathlib import Path
 
-# --- DeepFace Bootloader Injection ---
-# The official DeepFace v1.0 Github URL is permanently 404. It causes cloud deploys to repeatedly download 
-# a 9-byte error file and crash. To fix this, we bundle a valid 5.7MB .h5 weight file and aggressively copy it.
+# ── DeepFace Bootloader Injection ─────────────────────────────────────────────
+# The official DeepFace v1.0 Github URL is permanently 404. It causes cloud
+# deploys to repeatedly download a 9-byte error file and crash.  We bundle a
+# valid .h5 weight file and copy it aggressively.
 home = str(Path.home())
 df_weights_dir = os.path.join(home, ".deepface", "weights")
 target_weights = os.path.join(df_weights_dir, "facial_expression_model_weights.h5")
-bundled_weights = os.path.join(os.path.dirname(__file__), "..", "models", "facial_expression_model_weights.h5")
+bundled_weights = os.path.join(
+    os.path.dirname(__file__), "..", "models", "facial_expression_model_weights.h5"
+)
 
 os.makedirs(df_weights_dir, exist_ok=True)
 if os.path.exists(bundled_weights) and not os.path.exists(target_weights):
     print(f"[Bootloader] Injecting bundled DeepFace weights into {target_weights}...")
     shutil.copy(bundled_weights, target_weights)
 
-# Try to detect if DeepFace is installed without importing it (to prevent Render timeout)
 import importlib.util
 HAS_DEEPFACE = importlib.util.find_spec("deepface") is not None
 if HAS_DEEPFACE:
@@ -34,18 +35,86 @@ else:
 
 router = APIRouter()
 
-# OpenCV fallback face detector
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+face_cascade = cv2.CascadeClassifier(
+    cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+)
 
-# Emotion→distress weights
-DISTRESS_EMOTIONS = {"sad": 1.0, "fear": 0.9, "angry": 0.7, "disgust": 0.5}
+# ── Distress weights (used in score, NOT in classification) ───────────────────
+DISTRESS_WEIGHTS = {"sad": 1.0, "fear": 0.9, "angry": 0.7, "disgust": 0.5}
+
+# ── Custom emotion thresholds ──────────────────────────────────────────────────
+# DeepFace's raw 0-100 scores are used here.  Neutral wins only when TRULY
+# dominant; other emotions are promoted earlier.
+THRESHOLDS = {
+    "happy":    25.0,   # needs at least 25% raw probability
+    "sad":      10.0,   # reduced threshold — model is very stingy with sad
+    "angry":    12.0,
+    "fear":     10.0,
+    "disgust":   8.0,
+    "surprise":  8.0,
+    "neutral":  60.0,   # neutral only wins if genuinely overwhelming
+}
+
+# Priority order when multiple emotions exceed their threshold
+PRIORITY_ORDER = ["fear", "angry", "sad", "disgust", "surprise", "happy", "neutral"]
+
+
+def classify_emotion(raw: dict) -> tuple[str, float]:
+    """
+    Custom classifier that replaces DeepFace's naive argmax dominant_emotion.
+
+    Strategy:
+      1. Find all emotions that exceed their individual threshold.
+      2. Among those, pick the one with highest priority (PRIORITY_ORDER).
+      3. If none exceed threshold, fall back to argmax (still better than always neutral).
+
+    Returns (dominant_emotion, confidence_0_to_1)
+    """
+    eligible = {
+        emotion: score
+        for emotion, score in raw.items()
+        if score >= THRESHOLDS.get(emotion, 50.0)
+    }
+
+    if eligible:
+        # Pick by priority order (fear > angry > sad > ... > neutral)
+        for candidate in PRIORITY_ORDER:
+            if candidate in eligible:
+                confidence = eligible[candidate] / 100.0
+                return candidate, round(confidence, 4)
+
+    # Fallback: plain argmax (neutral likely, but at least it's honest)
+    dominant = max(raw, key=lambda k: raw[k])
+    return dominant, round(raw[dominant] / 100.0, 4)
+
+
+def preprocess_frame(img: np.ndarray) -> np.ndarray:
+    """
+    Lightweight preprocessing to improve DeepFace emotion accuracy:
+      - Histogram equalisation per channel (CLAHE) fixes uneven lighting
+      - Slight sharpening recovers detail lost in low-res webcam frames
+    """
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    l_ch, a_ch, b_ch = cv2.split(lab)
+    l_eq = clahe.apply(l_ch)
+    lab_eq = cv2.merge([l_eq, a_ch, b_ch])
+    enhanced = cv2.cvtColor(lab_eq, cv2.COLOR_LAB2BGR)
+
+    # Mild unsharp mask
+    blur = cv2.GaussianBlur(enhanced, (0, 0), 3)
+    sharpened = cv2.addWeighted(enhanced, 1.4, blur, -0.4, 0)
+    return sharpened
+
 
 class ImageRequest(BaseModel):
     image_base64: str
 
+
 @router.post("/analyze-face")
 async def analyze_face(request: Request, body: ImageRequest):
-    # --- Decode image ---
+
+    # ── Decode image ──────────────────────────────────────────────────────────
     try:
         header, encoded = body.image_base64.split(",", 1)
         img_bytes = base64.b64decode(encoded)
@@ -58,80 +127,93 @@ async def analyze_face(request: Request, body: ImageRequest):
     if img is None:
         return {"dominant_emotion": "error", "distress_score": 0, "error": "Invalid image"}
 
-    # --- Step 1: Quick OpenCV face pre-check ---
-    # This runs in milliseconds and tells us if there's even a face in frame
+    # ── Step 1: Preprocess for better accuracy ────────────────────────────────
+    img = preprocess_frame(img)
+
+    # ── Step 2: OpenCV fast face pre-check ───────────────────────────────────
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    faces_quick = face_cascade.detectMultiScale(gray, scaleFactor=1.05, minNeighbors=3, minSize=(30, 30))
-    
+    faces_quick = face_cascade.detectMultiScale(
+        gray, scaleFactor=1.05, minNeighbors=3, minSize=(30, 30)
+    )
+
     if len(faces_quick) == 0:
-        # No face found by OpenCV — don't even bother calling DeepFace
         print("[FaceAnalysis] ❌ No face detected (OpenCV pre-check)")
         return {
             "emotions": {},
             "dominant_emotion": "no face detected",
             "distress_score": 0.0,
-            "engine": "opencv_precheck"
+            "engine": "opencv_precheck",
         }
 
-    # --- Step 2: DeepFace emotion analysis (face confirmed by OpenCV) ---
+    # ── Step 3: DeepFace emotion analysis ────────────────────────────────────
     if HAS_DEEPFACE:
         try:
             from deepface import DeepFace  # type: ignore
+
             results = DeepFace.analyze(
                 img,
                 actions=["emotion"],
-                enforce_detection=False,  # We already confirmed face exists above
+                enforce_detection=False,
                 detector_backend="opencv",
-                silent=True
+                silent=True,
             )
 
             result = results[0] if isinstance(results, list) else results
-            raw_emotions = result.get("emotion", {})
-            dominant = result.get("dominant_emotion", "neutral")
+            raw_emotions: dict = result.get("emotion", {})   # 0-100 scale
 
-            # Normalize to 0-1 (DeepFace returns 0-100)
+            # ── Custom dominant emotion (replaces DeepFace argmax) ────────────
+            dominant, confidence = classify_emotion(raw_emotions)
+
+            # ── Normalize to 0-1 for frontend ────────────────────────────────
+            # Keep raw scale for threshold logic; normalize separately for display
             total = float(sum(raw_emotions.values()) or 1.0)
-            emotions = {str(k): float(round(float(v) / total, 4)) for k, v in raw_emotions.items()}  # type: ignore
+            emotions_norm = {
+                str(k): float(round(float(v) / total, 4))
+                for k, v in raw_emotions.items()
+            }
 
-            # Weighted distress score
+            # ── Distress score using normalized values ────────────────────────
             distress_score = sum(
-                emotions.get(e, 0) * w * 100
-                for e, w in DISTRESS_EMOTIONS.items()
+                emotions_norm.get(e, 0) * w * 100
+                for e, w in DISTRESS_WEIGHTS.items()
             )
 
-            # Reduce if happy
-            happiness = emotions.get("happy", 0)
+            # Reduce if genuinely happy
+            happiness = emotions_norm.get("happy", 0)
             if happiness > 0.35:
-                distress_score *= (1 - happiness * 0.85)
+                distress_score *= 1 - happiness * 0.85
 
-            # Clamp score between 0.0 and 95.0 and round
-            distress_score = float(max(0.0, min(95.0, float(distress_score))))
-            distress_score = round(distress_score, 2)  # type: ignore
-            print(f"[FaceAnalysis] ✅ {dominant} | distress={distress_score} | emotions={emotions}")
+            distress_score = round(float(max(0.0, min(95.0, distress_score))), 2)
+
+            print(
+                f"[FaceAnalysis] ✅ dominant={dominant} (conf={confidence}) | "
+                f"distress={distress_score} | raw={raw_emotions}"
+            )
 
             return {
-                "emotions": emotions,
+                "emotions": emotions_norm,
+                "raw_emotions": {str(k): round(float(v), 2) for k, v in raw_emotions.items()},
                 "dominant_emotion": dominant,
+                "confidence": confidence,
                 "distress_score": distress_score,
-                "engine": "DeepFace"
+                "engine": "DeepFace+CustomClassifier",
             }
 
         except Exception as e:
             print(f"[FaceAnalysis] ⚠️ DeepFace error: {e}")
-            # Fall through to OpenCV-only response
             return {
                 "emotions": {"neutral": 1.0},
                 "dominant_emotion": "face detected",
                 "distress_score": 5.0,
                 "engine": "opencv_fallback",
-                "error": str(e)
+                "error": str(e),
             }
-    else:
-        # DeepFace not installed — but OpenCV did find a face
-        print("[FaceAnalysis] Face found (OpenCV only, no emotion AI)")
-        return {
-            "emotions": {"neutral": 1.0},
-            "dominant_emotion": "face detected",
-            "distress_score": 5.0,
-            "engine": "opencv_only"
-        }
+
+    # ── DeepFace not installed ────────────────────────────────────────────────
+    print("[FaceAnalysis] Face found (OpenCV only, no emotion AI)")
+    return {
+        "emotions": {"neutral": 1.0},
+        "dominant_emotion": "face detected",
+        "distress_score": 5.0,
+        "engine": "opencv_only",
+    }
