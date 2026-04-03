@@ -1,0 +1,220 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
+:root {
+  /* Primary palette — from chatbot reference */
+  --pink-primary: #e91e8c;
+  --pink-light: #f06292;
+  --magenta: #9c27b0;
+  --lavender: #ce93d8;
+  --sky-blue: #81d4fa;
+  --blush: #fce4ec;
+  --pearl: #f0e6f6;
+  --ice: #e8f0fe;
+
+  /* Text */
+  --text-primary: #1a1a2e;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+
+  /* Glass */
+  --glass-bg: rgba(255, 255, 255, 0.35);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-shadow: 0 8px 32px rgba(233, 30, 140, 0.08);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #e91e8c, #9c27b0);
+  --gradient-bg: linear-gradient(135deg, #f0e6f6, #fce4ec, #e8f0fe);
+  --gradient-dark: linear-gradient(135deg, #0f0f1a, #1a1a2e);
+
+  /* Fonts */
+  --font-display: 'Bricolage Grotesque', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  background: var(--gradient-bg);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+}
+
+/* Glass Card */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  box-shadow: var(--glass-shadow);
+}
+
+/* Neobrutalist Button Base */
+.neo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.9);
+}
+
+.neo-btn:hover {
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 0.9);
+  transform: translate(-2px, -2px);
+}
+
+.neo-btn:active {
+  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.9);
+  transform: translate(1px, 1px);
+}
+
+.neo-btn-primary {
+  background: var(--gradient-primary);
+  color: white;
+}
+
+.neo-btn-secondary {
+  background: white;
+  color: var(--text-primary);
+  border: 2px solid var(--text-primary);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animated mesh background */
+@keyframes meshDrift {
+  0% {
+    background-position: 0% 0%;
+  }
+
+  25% {
+    background-position: 50% 50%;
+  }
+
+  50% {
+    background-position: 100% 100%;
+  }
+
+  75% {
+    background-position: 50% 0%;
+  }
+
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+.mesh-bg {
+  background: linear-gradient(45deg, #f0e6f6, #fce4ec, #e8f0fe, #f0e6f6, #fce4ec);
+  background-size: 400% 400%;
+  animation: meshDrift 60s ease-in-out infinite;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--lavender);
+  border-radius: 3px;
+}
+
+/* Dot grid overlay */
+.dot-grid {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+@keyframes moveBackground {
+  from {
+    background-position: 0% 0%;
+  }
+
+  to {
+    background-position: 0% -1000%;
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes breathe {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: scale(1.03);
+    opacity: 1;
+  }
+}
+
+@keyframes orbRotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}

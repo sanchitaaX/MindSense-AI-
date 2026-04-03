@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+slowapi
+deepface
+opencv-python-headless
+tf-keras
+transformers
+torch
+pillow
+numpy
+python-multipart
+groq
+python-dotenv
