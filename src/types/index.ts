@@ -9,6 +9,7 @@ export interface Message {
 export interface RiskScore {
     score: number;
     level: "low" | "moderate" | "high";
+    mode: "A" | "B"; // A = Text+Webcam, B = Voice
     textScore: number;
     faceScore: number;
     voiceScore: number;
@@ -19,6 +20,7 @@ export interface EmotionData {
     emotions: Record<string, number>;
     dominant_emotion: string;
     distress_score: number;
+    crisis_detected?: boolean;
 }
 
 export interface Session {

@@ -146,7 +146,7 @@ export function WebcamCapture({
                     drag
                     dragConstraints={{ left: -1000, right: 1000, top: -1000, bottom: 1000 }} // Free drag within reasonable bounds
                     style={{ position: "fixed", top: 120, right: 32, zIndex: 100 }} // Very high z-index
-                    className="w-36 overflow-hidden rounded-xl bg-white border-4 border-black shadow-[6px_6px_0px_#000] cursor-move flex flex-col"
+                    className="w-28 overflow-hidden rounded-xl bg-white border-2 border-black shadow-[4px_4px_0px_#000] cursor-move flex flex-col"
                 >
                     {/* Header bar / Drag handle */}
                     <div style={{ padding: "6px 8px", background: "#000", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #000" }}>

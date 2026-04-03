@@ -7,7 +7,6 @@ from pydantic import BaseModel  # type: ignore
 import base64
 import numpy as np  # type: ignore
 import cv2  # type: ignore
-from limiter import limiter  # type: ignore
 
 import shutil
 from pathlib import Path
@@ -45,7 +44,6 @@ class ImageRequest(BaseModel):
     image_base64: str
 
 @router.post("/analyze-face")
-@limiter.limit("60/minute")
 async def analyze_face(request: Request, body: ImageRequest):
     # --- Decode image ---
     try:

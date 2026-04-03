@@ -39,30 +39,31 @@ export const Navbar: React.FC = () => {
                 transform: "translateX(-50%)",
                 zIndex: 100,
                 width: 900,
-                background: isHero ? "rgba(255, 255, 255, 0.15)" : "rgba(255, 255, 255, 0.35)",
+                background: isHero ? "rgba(255, 255, 255, 0.2)" : "rgba(255, 255, 255, 0.35)",
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",
                 borderRadius: 50,
-                border: isHero ? "2px solid rgba(233, 30, 140, 0.7)" : "1px solid rgba(255,255,255,0.6)",
-                padding: "12px 32px",
+                border: isHero ? "1px solid rgba(233, 30, 140, 0.4)" : "1px solid rgba(255,255,255,0.6)",
+                padding: "8px 24px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                boxShadow: isHero ? "0 4px 20px rgba(0,0,0,0.05)" : "0 8px 32px rgba(0,0,0,0.05)",
             }}
         >
             {/* Brand */}
-            <Link to="/" style={{ display: "flex", alignItems: "center", gap: 12, textDecoration: "none" }}>
-                <div className={`p-1.5 rounded-xl shadow-[4px_4px_0px_#000] flex items-center justify-center ${isHero ? 'bg-white/90 backdrop-blur-md border-2 border-pink-500' : 'bg-white border-2 border-slate-900'}`}>
-                    <img src="/src/assets/logo.png" alt="MindSense Logo" style={{ width: 44, height: 44, objectFit: "contain" }} />
+            <Link to="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+                <div className={`p-1.5 rounded-[12px] shadow-[2px_2px_0px_rgba(0,0,0,0.5)] flex items-center justify-center ${isHero ? 'bg-white/80 backdrop-blur-md border-[1.5px] border-pink-400' : 'bg-white border-2 border-slate-900'}`}>
+                    <img src="/src/assets/logo.png" alt="MindSense Logo" style={{ width: 36, height: 36, objectFit: "contain" }} />
                 </div>
                 <span
                     style={{
                         fontFamily: "var(--font-display)",
-                        fontSize: 26,
-                        fontWeight: 900,
+                        fontSize: 22,
+                        fontWeight: 800,
                         letterSpacing: "-0.5px",
-                        color: isHero ? "white" : "var(--text-primary)",
+                        color: "var(--text-primary)",
+                        textShadow: isHero ? "0px 1px 8px rgba(255,255,255,0.7)" : "none",
                     }}
                 >
                     MindSense AI
@@ -77,16 +78,15 @@ export const Navbar: React.FC = () => {
                         to={link.to}
                         style={{
                             textDecoration: "none",
-                            padding: "8px 20px",
+                            padding: "8px 18px",
                             borderRadius: 50,
                             fontSize: 14,
                             fontWeight: 600,
                             color:
                                 location.pathname === link.to
                                     ? "white"
-                                    : isHero
-                                        ? "rgba(255,255,255,0.7)"
-                                        : "var(--text-secondary)",
+                                    : "var(--text-secondary)",
+                            textShadow: isHero && location.pathname !== link.to ? "0px 1px 8px rgba(255,255,255,0.7)" : "none",
                             background:
                                 location.pathname === link.to
                                     ? "linear-gradient(135deg, #e91e8c, #9c27b0)"
@@ -135,7 +135,7 @@ export const Navbar: React.FC = () => {
                             style={{
                                 fontSize: 13,
                                 fontWeight: 700,
-                                color: isHero ? "rgba(255,255,255,0.9)" : "var(--text-primary)",
+                                color: "var(--text-primary)",
                                 maxWidth: 120,
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
@@ -160,7 +160,7 @@ export const Navbar: React.FC = () => {
                             cursor: "pointer",
                             fontSize: 13,
                             fontWeight: 700,
-                            color: isHero ? "rgba(255,255,255,0.8)" : "var(--text-primary)",
+                            color: "var(--text-primary)",
                             fontFamily: "var(--font-body)",
                             transition: "all 0.2s ease",
                         }}

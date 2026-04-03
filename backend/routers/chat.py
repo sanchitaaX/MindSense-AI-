@@ -6,10 +6,6 @@ import os
 import json
 import asyncio
 from typing import List, Optional
-from limiter import limiter
-from dotenv import load_dotenv
-
-load_dotenv()
 
 router = APIRouter()
 
@@ -28,7 +24,6 @@ SYSTEM_PROMPT = """You are MindSense, an empathetic mental health AI. Validate e
 CRISIS_PROMPT = """You are MindSense in Crisis Support Mode. The user's distress signals are very high. Be extremely compassionate, use de-escalation language, active listening, and gently encourage them to reach out to the professional resources listed in their dashboard. Keep responses calm, validating, and focused on safety. Do not diagnose, but prioritize empathetic connection and resource guidance."""
 
 @router.post("/chat")
-@limiter.limit("20/minute")
 async def chat_stream(request: Request, body: ChatRequest):
     try:
         # Determine prompt based on risk score

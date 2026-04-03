@@ -3,7 +3,6 @@ from pydantic import BaseModel
 import hashlib
 import time
 import os
-from limiter import limiter
 
 router = APIRouter()
 
@@ -12,7 +11,6 @@ class VoucherRequest(BaseModel):
     risk_score: float
 
 @router.post("/generate-voucher")
-@limiter.limit("5/minute")
 async def generate_voucher(request: Request, body: VoucherRequest):
     try:
         if body.risk_score >= 30:

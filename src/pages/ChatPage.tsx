@@ -142,7 +142,7 @@ export const ChatPage: React.FC = () => {
                 body: JSON.stringify({ text: lastMsg.content })
             })
                 .then(res => res.json())
-                .then(data => updateTextScore(data.distress_score, data.dominant_emotion))
+                .then(data => updateTextScore(data.distress_score, data.dominant_emotion, data.crisis_detected))
                 .catch(console.error);
         }
     }, [isLoading]);
