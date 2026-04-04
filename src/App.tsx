@@ -8,6 +8,10 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { ReduceStressPage } from "./pages/ReduceStressPage";
 import { GlassFilter } from "./components/ui/liquid-glass";
 
+/**
+ * AppRoutes Component
+ * Handles all application routing and animations
+ */
 function AppRoutes() {
   const location = useLocation();
   return (
