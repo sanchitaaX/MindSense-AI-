@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { auth } from "../lib/firebase";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
+import logoImg from "../assets/logo.png";
 
 export const Navbar: React.FC = () => {
     const location = useLocation();
@@ -54,7 +55,7 @@ export const Navbar: React.FC = () => {
             {/* Brand */}
             <Link to="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
                 <div className={`p-1.5 rounded-[12px] shadow-[2px_2px_0px_rgba(0,0,0,0.5)] flex items-center justify-center ${isHero ? 'bg-white/80 backdrop-blur-md border-[1.5px] border-pink-400' : 'bg-white border-2 border-slate-900'}`}>
-                    <img src="/src/assets/logo.png" alt="MindSense Logo" style={{ width: 36, height: 36, objectFit: "contain" }} />
+                    <img src={logoImg} alt="MindSense Logo" style={{ width: 36, height: 36, objectFit: "contain" }} />
                 </div>
                 <span
                     style={{
