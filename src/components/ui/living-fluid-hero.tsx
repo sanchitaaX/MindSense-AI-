@@ -102,7 +102,7 @@ extend({ FluidMaterial });
 // Export the internal 3D scene component so it can be used standalone
 export const FluidScene = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const materialRef = useRef<any>();
+    const materialRef = useRef<any>(null);
     const mouse = useRef(new THREE.Vector2(0, 0));
 
     useEffect(() => {
