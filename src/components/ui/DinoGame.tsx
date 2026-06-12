@@ -4,6 +4,7 @@ export const DinoGame: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [gameOver, setGameOver] = useState(false);
     const [score, setScore] = useState(0);
+    const [highScore, setHighScore] = useState(() => Number(localStorage.getItem('dino_high_score') || 0));
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -93,6 +94,11 @@ export const DinoGame: React.FC = () => {
                 ) {
                     gameActive = false;
                     setGameOver(true);
+                    const savedHighScore = Number(localStorage.getItem('dino_high_score') || 0);
+                    if (currentScore > savedHighScore) {
+                        localStorage.setItem('dino_high_score', String(currentScore));
+                        setHighScore(currentScore);
+                    }
                 }
             });
 
@@ -113,8 +119,11 @@ export const DinoGame: React.FC = () => {
             drawDino();
             drawObstacles();
 
-            ctx.fillStyle = '#000';
+            ctx.fillStyle = '#64748b';
             ctx.font = '16px monospace';
+            ctx.fillText(`HI: ${Math.max(highScore, currentScore)}`, 550, 30);
+
+            ctx.fillStyle = '#000';
             ctx.fillText(`Score: ${currentScore}`, 680, 30);
 
             if (!gameActive) {
@@ -140,7 +149,7 @@ export const DinoGame: React.FC = () => {
             window.removeEventListener('keydown', handleKeyDown);
             cancelAnimationFrame(animationFrameId);
         };
-    }, []);
+    }, [highScore]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -159,8 +168,9 @@ export const DinoGame: React.FC = () => {
                 }}
             />
             {gameOver && (
-                <div style={{ marginTop: 20 }}>
+                <div style={{ marginTop: 20, display: 'flex', gap: 24 }}>
                     <p style={{ fontSize: 20, fontWeight: 700, color: '#e91e8c' }}>Final Score: {score}</p>
+                    <p style={{ fontSize: 20, fontWeight: 700, color: '#64748b' }}>High Score: {highScore}</p>
                 </div>
             )}
         </div>
